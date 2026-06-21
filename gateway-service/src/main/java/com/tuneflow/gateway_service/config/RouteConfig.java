@@ -22,9 +22,12 @@ public class RouteConfig {
                         .path("/api/v1/users/**")
                         .uri("http://localhost:8083"))
 
-                // .route("music-service", r -> r
-                //         .path("/api/v1/music/**")
-                //         .uri("http://localhost:8084"))
+                .route("music-service", r -> r
+                        .path("/api/v1/artists/**",
+                                "/api/v1/artists",
+                                "/api/v1/genres/**",
+                                "/api/v1/genres")
+                        .uri("http://localhost:8084"))
 
                 // .route("playlist-service", r -> r
                 //         .path("/api/v1/playlists/**")

@@ -27,7 +27,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/v1/auth/verify-email",
             "/api/v1/auth/resend-verification",
             "/api/v1/auth/refresh-token",
-            "/actuator/health"
+            "/api/v1/artists/**",
+            "/api/v1/artists",
+            "/actuator/health",
+            "/api/v1/genres/**",
+            "/api/v1/genres"
     );
     private final JwtUtils jwtUtils;
 
