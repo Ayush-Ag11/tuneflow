@@ -1,6 +1,8 @@
 package com.tuneflow.auth_service.service.impl;
 
+import com.tuneflow.auth_service.client.UserServiceClient;
 import com.tuneflow.auth_service.config.VerificationProperties;
+import com.tuneflow.auth_service.dto.request.CreateUserProfileRequest;
 import com.tuneflow.auth_service.dto.request.LoginRequest;
 import com.tuneflow.auth_service.dto.request.LogoutRequest;
 import com.tuneflow.auth_service.dto.request.RefreshTokenRequest;
@@ -43,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
     private final VerificationProperties verificationProperties;
+    private final UserServiceClient userServiceClient;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -62,6 +65,19 @@ public class AuthServiceImpl implements AuthService {
         );
 
         User savedUser = userRepository.save(user);
+
+        try {
+            userServiceClient.createUserProfile(
+                    new CreateUserProfileRequest(
+                            savedUser.getId(),
+                            savedUser.getUsername(),
+                            savedUser.getEmail()
+                    )
+            );
+        } catch (Exception e) {
+            userRepository.delete(savedUser);
+            throw e;
+        }
 
         String verificationToken =
                 UUID.randomUUID().toString();
@@ -196,9 +212,9 @@ public class AuthServiceImpl implements AuthService {
     ) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(
-                                request.refreshToken())
-                        .orElseThrow(() ->
-                                new BadCredentialsException("Invalid refresh token"));
+                        request.refreshToken())
+                .orElseThrow(() ->
+                        new BadCredentialsException("Invalid refresh token"));
         if (refreshToken.isRevoked()) {
             return;
         }

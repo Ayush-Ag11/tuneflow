@@ -19,18 +19,18 @@ public class ConsoleEmailService implements EmailService {
         String verificationLink = BASE_URL + "?token=" + verificationToken;
 
         log.info("""
-                
-                ==========================================
-                EMAIL VERIFICATION
-                ==========================================
-                
-                To      : {}
-                
-                Verify  : {}
-                
-                ==========================================
-                
-                """,
+                        
+                        ==========================================
+                        EMAIL VERIFICATION
+                        ==========================================
+                        
+                        To      : {}
+                        
+                        Verify  : {}
+                        
+                        ==========================================
+                        
+                        """,
                 user.getEmail(),
                 verificationLink
         );

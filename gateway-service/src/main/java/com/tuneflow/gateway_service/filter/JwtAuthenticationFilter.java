@@ -20,8 +20,6 @@ import java.util.List;
 @Slf4j
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
-    private final JwtUtils jwtUtils;
-
     // Paths that bypass JWT validation entirely
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/auth/register",
@@ -31,6 +29,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/v1/auth/refresh-token",
             "/actuator/health"
     );
+    private final JwtUtils jwtUtils;
 
     @Override
     public Mono<Void> filter(

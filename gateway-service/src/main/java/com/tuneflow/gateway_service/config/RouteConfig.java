@@ -18,9 +18,9 @@ public class RouteConfig {
                         .uri("http://localhost:8082"))
 
                 // Future services — uncomment as you build them
-                // .route("user-service", r -> r
-                //         .path("/api/v1/users/**")
-                //         .uri("http://localhost:8083"))
+                .route("user-service", r -> r
+                        .path("/api/v1/users/**")
+                        .uri("http://localhost:8083"))
 
                 // .route("music-service", r -> r
                 //         .path("/api/v1/music/**")

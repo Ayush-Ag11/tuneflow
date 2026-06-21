@@ -4,7 +4,6 @@ import com.tuneflow.auth_service.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public interface JwtService {
 
