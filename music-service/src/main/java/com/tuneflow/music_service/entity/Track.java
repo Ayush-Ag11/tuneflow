@@ -1,0 +1,63 @@
+package com.tuneflow.music_service.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+@Entity
+@Table(name = "tracks")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Track extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private Integer durationInSeconds;
+
+    @Column(nullable = false)
+    private String audioUrl;
+
+    private String coverImageUrl;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Long playCount = 0L;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "album_id")
+    private Album album;
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "track_artists",
+            joinColumns = @JoinColumn(name = "track_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id")
+    )
+    private Set<Artist> artists = new HashSet<>();
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "track_genres",
+            joinColumns = @JoinColumn(name = "track_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres = new HashSet<>();
+}
