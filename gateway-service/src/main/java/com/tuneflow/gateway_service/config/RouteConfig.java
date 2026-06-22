@@ -26,7 +26,9 @@ public class RouteConfig {
                         .path("/api/v1/artists/**",
                                 "/api/v1/artists",
                                 "/api/v1/genres/**",
-                                "/api/v1/genres")
+                                "/api/v1/genres",
+                                "/api/v1/albums/**",
+                                "/api/v1/albums")
                         .uri("http://localhost:8084"))
 
                 // .route("playlist-service", r -> r

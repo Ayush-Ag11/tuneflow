@@ -23,10 +23,11 @@ public class ArtistServiceImpl implements ArtistService {
     @Override
     public ArtistResponse createArtist(CreateArtistRequest request) {
 
-        if (artistRepository.existsByName(request.name())) {
-            throw new DuplicateResourceException("Artist already exists with name: "
-                    + request.name());
-        }
+        artistRepository.findByNameIgnoreCase(request.name())
+                .ifPresent(artist -> {
+                    throw new DuplicateResourceException("Artist already exists with name: "
+                            + request.name());
+                });
 
         Artist artist = new Artist();
 

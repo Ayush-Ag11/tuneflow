@@ -1,0 +1,24 @@
+package com.tuneflow.music_service.repository;
+
+import com.tuneflow.music_service.entity.Album;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface AlbumRepository extends JpaRepository<Album, UUID> {
+
+    Optional<Album> findByIdAndActiveTrue(UUID id);
+
+    List<Album> findAllByActiveTrue();
+
+    List<Album> findByArtistIdAndActiveTrue(UUID artistId);
+
+    Optional<Album> findByTitleIgnoreCaseAndArtistIdAndActiveTrue(
+            String title,
+            UUID artistId
+    );
+}
