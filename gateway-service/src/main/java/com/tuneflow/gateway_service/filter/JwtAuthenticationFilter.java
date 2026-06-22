@@ -8,8 +8,10 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -20,32 +22,34 @@ import java.util.List;
 @Slf4j
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
-    // Paths that bypass JWT validation entirely
-    private static final List<String> PUBLIC_PATHS = List.of(
+    private static final List<String> PUBLIC_ANY_METHOD_PATHS = List.of(
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/verify-email",
             "/api/v1/auth/resend-verification",
             "/api/v1/auth/refresh-token",
-            "/api/v1/artists/**",
-            "/api/v1/artists",
-            "/api/v1/genres/**",
-            "/api/v1/genres",
-            "/api/v1/albums/**",
-            "/api/v1/albums",
             "/actuator/health"
-
     );
+
+    private static final List<String> PUBLIC_GET_PATHS = List.of(
+            "/api/v1/artists/**",
+            "/api/v1/genres/**",
+            "/api/v1/albums/**",
+            "/api/v1/tracks/**"
+    );
+
     private final JwtUtils jwtUtils;
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
-    public Mono<Void> filter(
-            ServerWebExchange exchange,
-            GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        if (isPublicPath(path)) {
+        HttpMethod method = exchange.getRequest().getMethod();
+
+        if (isPublicEndpoint(path, method)) {
             return chain.filter(exchange);
         }
 
@@ -63,42 +67,61 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange);
         }
 
-        // Token is valid — extract claims and forward user identity downstream
         Claims claims = jwtUtils.extractAllClaims(token);
 
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(r -> r
+                .request(request -> request
                         .header("X-User-Id", claims.getSubject())
                         .header("X-User-Email",
                                 claims.get("email", String.class))
                         .header("X-User-Name",
                                 claims.get("username", String.class))
-                        // Strip original Authorization header so downstream
-                        // services never see the raw JWT
                         .headers(headers ->
-                                headers.remove(HttpHeaders.AUTHORIZATION))
-                )
+                                headers.remove(HttpHeaders.AUTHORIZATION)))
                 .build();
 
-        log.debug("Authenticated request from userId={} path={}",
-                claims.getSubject(), path);
+        log.debug(
+                "Authenticated request from userId={} method={} path={}",
+                claims.getSubject(),
+                method,
+                path
+        );
 
         return chain.filter(mutatedExchange);
     }
 
     @Override
     public int getOrder() {
-        // Run before all other filters
         return Ordered.HIGHEST_PRECEDENCE;
     }
 
-    private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream()
-                .anyMatch(path::startsWith);
+    private boolean isPublicEndpoint(
+            String path,
+            HttpMethod method
+    ) {
+
+        boolean publicAnyMethod =
+                PUBLIC_ANY_METHOD_PATHS.stream().anyMatch(pattern ->
+                                pathMatcher.match(pattern, path));
+
+        if (publicAnyMethod) {
+            return true;
+        }
+
+        if (HttpMethod.GET.equals(method)) {
+
+            return PUBLIC_GET_PATHS.stream()
+                    .anyMatch(pattern ->
+                            pathMatcher.match(pattern, path));
+        }
+
+        return false;
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
+
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+
         return exchange.getResponse().setComplete();
     }
 }

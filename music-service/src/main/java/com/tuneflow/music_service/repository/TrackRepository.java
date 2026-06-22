@@ -15,5 +15,13 @@ public interface TrackRepository extends JpaRepository<Track, UUID> {
 
     List<Track> findAllByActiveTrue();
 
+    boolean existsByTitleIgnoreCaseAndActiveTrue(String title);
+
     Optional<Track> findByTitleIgnoreCaseAndActiveTrue(String title);
+
+    List<Track> findByAlbumIdAndActiveTrue(UUID albumId);
+
+    List<Track> findByGenresIdAndActiveTrue(UUID genreId);
+
+    List<Track> findByArtistsIdAndActiveTrue(UUID artistId);
 }
