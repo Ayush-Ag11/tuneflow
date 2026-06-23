@@ -27,9 +27,9 @@ management:
         include: health,info
 
 minio:
-  url: http://localhost:9000
-  access-key: minioadmin
-  secret-key: minioadmin
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: admin123
 
   buckets:
     artists: artists
