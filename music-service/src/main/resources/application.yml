@@ -25,3 +25,13 @@ management:
     web:
       exposure:
         include: health,info
+
+minio:
+  url: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+
+  buckets:
+    artists: artists
+    albums: albums
+    tracks: tracks
