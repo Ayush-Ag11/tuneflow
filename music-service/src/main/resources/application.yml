@@ -28,6 +28,7 @@ management:
 
 minio:
   endpoint: http://localhost:9000
+  public-url: http://localhost:9000
   access-key: admin
   secret-key: admin123
 

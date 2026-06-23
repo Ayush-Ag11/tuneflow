@@ -15,6 +15,8 @@ public class MinioProperties {
 
     private String secretKey;
 
+    private String publicUrl;
+
     private Buckets buckets = new Buckets();
 
     @Getter
