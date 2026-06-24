@@ -56,6 +56,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileUploadResponse uploadArtistImage(
             MultipartFile file) {
 
+        validateFile(file);
+
         validateContentType(
                 file,
                 IMAGE_CONTENT_TYPES);
@@ -69,6 +71,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileUploadResponse uploadAlbumCover(
             MultipartFile file) {
 
+        validateFile(file);
+
         validateContentType(
                 file,
                 IMAGE_CONTENT_TYPES);
@@ -81,6 +85,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public FileUploadResponse uploadTrack(
             MultipartFile file) {
+
+        validateFile(file);
 
         validateContentType(
                 file,
@@ -199,5 +205,15 @@ public class FileStorageServiceImpl implements FileStorageService {
                 + bucketName
                 + "/"
                 + objectName;
+    }
+
+    private void validateFile(
+            MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+
+            throw new FileStorageException(
+                    "File cannot be empty");
+        }
     }
 }
