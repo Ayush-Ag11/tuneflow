@@ -3,6 +3,7 @@ package com.tuneflow.music_service.service.impl;
 import com.tuneflow.music_service.dto.request.CreateTrackRequest;
 import com.tuneflow.music_service.dto.request.UpdateTrackRequest;
 import com.tuneflow.music_service.dto.response.ArtistSummaryResponse;
+import com.tuneflow.music_service.dto.response.FileUploadResponse;
 import com.tuneflow.music_service.dto.response.GenreSummaryResponse;
 import com.tuneflow.music_service.dto.response.TrackResponse;
 import com.tuneflow.music_service.entity.Album;
@@ -15,10 +16,12 @@ import com.tuneflow.music_service.repository.AlbumRepository;
 import com.tuneflow.music_service.repository.ArtistRepository;
 import com.tuneflow.music_service.repository.GenreRepository;
 import com.tuneflow.music_service.repository.TrackRepository;
+import com.tuneflow.music_service.service.FileStorageService;
 import com.tuneflow.music_service.service.TrackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +37,7 @@ public class TrackServiceImpl implements TrackService {
     private final ArtistRepository artistRepository;
     private final AlbumRepository albumRepository;
     private final GenreRepository genreRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public TrackResponse createTrack(
@@ -164,6 +168,44 @@ public class TrackServiceImpl implements TrackService {
         track.setActive(false);
 
         trackRepository.save(track);
+    }
+
+    @Override
+    public TrackResponse uploadTrackAudio(UUID trackId, MultipartFile file) {
+
+        Track track = trackRepository.findById(trackId).orElseThrow(() ->
+                new ResourceNotFoundException("Track Not Found with ID: " + trackId));
+
+        FileUploadResponse fileUploadResponse = fileStorageService.uploadTrack(file);
+
+        track.setAudioUrl(fileUploadResponse.fileUrl());
+
+        Track updatedTrack = trackRepository.save(track);
+
+        return mapToResponse(updatedTrack);
+    }
+
+    @Override
+    public TrackResponse uploadTrackCover(
+            UUID trackId,
+            MultipartFile file) {
+
+        Track track = trackRepository.findById(trackId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Track not found with id: "
+                                        + trackId));
+
+        FileUploadResponse uploadResponse =
+                fileStorageService.uploadArtistImage(file);
+
+        track.setCoverImageUrl(
+                uploadResponse.fileUrl());
+
+        Track updatedTrack =
+                trackRepository.save(track);
+
+        return mapToResponse(updatedTrack);
     }
 
     private Track getActiveTrack(UUID trackId) {
