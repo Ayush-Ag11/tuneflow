@@ -3,13 +3,16 @@ package com.tuneflow.music_service.service.impl;
 import com.tuneflow.music_service.dto.request.CreateArtistRequest;
 import com.tuneflow.music_service.dto.request.UpdateArtistRequest;
 import com.tuneflow.music_service.dto.response.ArtistResponse;
+import com.tuneflow.music_service.dto.response.FileUploadResponse;
 import com.tuneflow.music_service.entity.Artist;
 import com.tuneflow.music_service.exception.DuplicateResourceException;
 import com.tuneflow.music_service.exception.ResourceNotFoundException;
 import com.tuneflow.music_service.repository.ArtistRepository;
 import com.tuneflow.music_service.service.ArtistService;
+import com.tuneflow.music_service.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class ArtistServiceImpl implements ArtistService {
 
     private final ArtistRepository artistRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public ArtistResponse createArtist(CreateArtistRequest request) {
@@ -94,6 +98,29 @@ public class ArtistServiceImpl implements ArtistService {
         artist.setActive(false);
 
         artistRepository.save(artist);
+    }
+
+    @Override
+    public ArtistResponse uploadArtistImage(
+            UUID artistId,
+            MultipartFile file) {
+
+        Artist artist = artistRepository.findById(artistId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Artist not found with id: "
+                                        + artistId));
+
+        FileUploadResponse uploadResponse =
+                fileStorageService.uploadArtistImage(file);
+
+        artist.setImageUrl(
+                uploadResponse.fileUrl());
+
+        Artist updatedArtist =
+                artistRepository.save(artist);
+
+        return mapToResponse(updatedArtist);
     }
 
     private ArtistResponse mapToResponse(Artist artist) {
