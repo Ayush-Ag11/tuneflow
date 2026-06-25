@@ -97,6 +97,22 @@ public class FileStorageServiceImpl implements FileStorageService {
                 minioProperties.getBuckets().getTracks());
     }
 
+    @Override
+    public FileUploadResponse uploadTrackCover(MultipartFile file) {
+
+        validateFile(file);
+
+        validateContentType(
+                file,
+                IMAGE_CONTENT_TYPES
+        );
+
+        return uploadFile(
+                file,
+                minioProperties.getBuckets().getTracks()
+        );
+    }
+
     private void createBucketIfNotExists(
             String bucketName) {
 

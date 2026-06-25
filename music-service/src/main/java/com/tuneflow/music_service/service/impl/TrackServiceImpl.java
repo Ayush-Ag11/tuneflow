@@ -197,7 +197,7 @@ public class TrackServiceImpl implements TrackService {
                                         + trackId));
 
         FileUploadResponse uploadResponse =
-                fileStorageService.uploadArtistImage(file);
+                fileStorageService.uploadTrackCover(file);
 
         track.setCoverImageUrl(
                 uploadResponse.fileUrl());
