@@ -3,6 +3,7 @@ package com.tuneflow.music_service.service.impl;
 import com.tuneflow.music_service.dto.request.CreateAlbumRequest;
 import com.tuneflow.music_service.dto.request.UpdateAlbumRequest;
 import com.tuneflow.music_service.dto.response.AlbumResponse;
+import com.tuneflow.music_service.dto.response.FileUploadResponse;
 import com.tuneflow.music_service.entity.Album;
 import com.tuneflow.music_service.entity.Artist;
 import com.tuneflow.music_service.exception.DuplicateResourceException;
@@ -10,8 +11,10 @@ import com.tuneflow.music_service.exception.ResourceNotFoundException;
 import com.tuneflow.music_service.repository.AlbumRepository;
 import com.tuneflow.music_service.repository.ArtistRepository;
 import com.tuneflow.music_service.service.AlbumService;
+import com.tuneflow.music_service.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +25,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public AlbumResponse createAlbum(CreateAlbumRequest request) {
@@ -110,6 +114,23 @@ public class AlbumServiceImpl implements AlbumService {
         album.setActive(false);
 
         albumRepository.save(album);
+    }
+
+    @Override
+    public AlbumResponse updateAlbumCover(UUID albumId, MultipartFile file) {
+
+        Album album = albumRepository.findById(albumId).orElseThrow(() ->
+                        new ResourceNotFoundException("Album Not Found with ID: " + albumId)
+        );
+
+        FileUploadResponse uploadResponse =
+                fileStorageService.uploadAlbumCover(file);
+
+        album.setCoverImageUrl(uploadResponse.fileUrl());
+
+        Album updatedAlbum = albumRepository.save(album);
+
+        return mapToResponse(updatedAlbum);
     }
 
     private Artist getActiveArtist(UUID artistId) {

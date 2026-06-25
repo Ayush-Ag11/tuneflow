@@ -9,7 +9,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +69,7 @@ public class AlbumController {
         List<AlbumResponse> response = albumService.getAllAlbums();
 
         return ResponseEntity.ok(
-               new ApiResponse<>(
+                new ApiResponse<>(
                         HttpStatus.OK.value(),
                         "Albums fetched successfully",
                         response
@@ -115,6 +124,21 @@ public class AlbumController {
                         HttpStatus.OK.value(),
                         "Album deleted successfully",
                         null
+                )
+        );
+    }
+
+    @PostMapping("{albumId}/cover")
+    public ResponseEntity<ApiResponse<AlbumResponse>> uploadCoverAlbum(
+            @PathVariable UUID albumId, @RequestParam("file") MultipartFile file) {
+
+        AlbumResponse response = albumService.updateAlbumCover(albumId, file);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Album image uploaded successfully",
+                        response
                 )
         );
     }

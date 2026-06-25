@@ -3,6 +3,7 @@ package com.tuneflow.music_service.service;
 import com.tuneflow.music_service.dto.request.CreateAlbumRequest;
 import com.tuneflow.music_service.dto.request.UpdateAlbumRequest;
 import com.tuneflow.music_service.dto.response.AlbumResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,4 +22,6 @@ public interface AlbumService {
                               UpdateAlbumRequest request);
 
     void deleteAlbum(UUID albumId);
+
+    AlbumResponse updateAlbumCover(UUID albumId, MultipartFile file);
 }
