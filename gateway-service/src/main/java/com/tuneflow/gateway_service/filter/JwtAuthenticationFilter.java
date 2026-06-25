@@ -102,7 +102,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         boolean publicAnyMethod =
                 PUBLIC_ANY_METHOD_PATHS.stream().anyMatch(pattern ->
-                                pathMatcher.match(pattern, path));
+                        pathMatcher.match(pattern, path));
 
         if (publicAnyMethod) {
             return true;

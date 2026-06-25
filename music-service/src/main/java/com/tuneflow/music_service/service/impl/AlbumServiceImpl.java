@@ -33,7 +33,7 @@ public class AlbumServiceImpl implements AlbumService {
         Artist artist =
                 getActiveArtist(request.getArtistId());
 
-        validateDuplicateAlbum(request.getTitle(),  request.getArtistId());
+        validateDuplicateAlbum(request.getTitle(), request.getArtistId());
 
         Album album = Album.builder()
                 .title(request.getTitle().trim())
@@ -120,8 +120,10 @@ public class AlbumServiceImpl implements AlbumService {
     public AlbumResponse updateAlbumCover(UUID albumId, MultipartFile file) {
 
         Album album = albumRepository.findById(albumId).orElseThrow(() ->
-                        new ResourceNotFoundException("Album Not Found with ID: " + albumId)
+                new ResourceNotFoundException("Album Not Found with ID: " + albumId)
         );
+
+        String oldCoverUrl = album.getCoverImageUrl();
 
         FileUploadResponse uploadResponse =
                 fileStorageService.uploadAlbumCover(file);
@@ -129,6 +131,8 @@ public class AlbumServiceImpl implements AlbumService {
         album.setCoverImageUrl(uploadResponse.fileUrl());
 
         Album updatedAlbum = albumRepository.save(album);
+
+        fileStorageService.deleteFile(oldCoverUrl);
 
         return mapToResponse(updatedAlbum);
     }

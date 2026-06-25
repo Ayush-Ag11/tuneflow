@@ -111,6 +111,8 @@ public class ArtistServiceImpl implements ArtistService {
                                 "Artist not found with id: "
                                         + artistId));
 
+        String oldImageUrl = artist.getImageUrl();
+
         FileUploadResponse uploadResponse =
                 fileStorageService.uploadArtistImage(file);
 
@@ -119,6 +121,8 @@ public class ArtistServiceImpl implements ArtistService {
 
         Artist updatedArtist =
                 artistRepository.save(artist);
+
+        fileStorageService.deleteFile(oldImageUrl);
 
         return mapToResponse(updatedArtist);
     }

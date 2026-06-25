@@ -12,4 +12,6 @@ public interface FileStorageService {
     FileUploadResponse uploadTrack(MultipartFile file);
 
     FileUploadResponse uploadTrackCover(MultipartFile file);
+
+    void deleteFile(String fileUrl);
 }

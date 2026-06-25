@@ -176,11 +176,16 @@ public class TrackServiceImpl implements TrackService {
         Track track = trackRepository.findById(trackId).orElseThrow(() ->
                 new ResourceNotFoundException("Track Not Found with ID: " + trackId));
 
+        String oldAudioUrl =
+                track.getAudioUrl();
+
         FileUploadResponse fileUploadResponse = fileStorageService.uploadTrack(file);
 
         track.setAudioUrl(fileUploadResponse.fileUrl());
 
         Track updatedTrack = trackRepository.save(track);
+
+        fileStorageService.deleteFile(oldAudioUrl);
 
         return mapToResponse(updatedTrack);
     }
@@ -196,6 +201,9 @@ public class TrackServiceImpl implements TrackService {
                                 "Track not found with id: "
                                         + trackId));
 
+        String oldCoverUrl =
+                track.getCoverImageUrl();
+
         FileUploadResponse uploadResponse =
                 fileStorageService.uploadTrackCover(file);
 
@@ -204,6 +212,8 @@ public class TrackServiceImpl implements TrackService {
 
         Track updatedTrack =
                 trackRepository.save(track);
+
+        fileStorageService.deleteFile(oldCoverUrl);
 
         return mapToResponse(updatedTrack);
     }
@@ -270,10 +280,10 @@ public class TrackServiceImpl implements TrackService {
         trackRepository.findByTitleIgnoreCaseAndActiveTrue(title.trim()).ifPresent(
                 existingTrack -> {
 
-            if (!existingTrack.getId().equals(trackId)) {
-                throw new DuplicateResourceException("Track already exists with title: " + title);
-            }
-        });
+                    if (!existingTrack.getId().equals(trackId)) {
+                        throw new DuplicateResourceException("Track already exists with title: " + title);
+                    }
+                });
     }
 
     private TrackResponse mapToResponse(Track track) {

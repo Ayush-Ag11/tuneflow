@@ -2,7 +2,6 @@ package com.tuneflow.music_service.service;
 
 import com.tuneflow.music_service.dto.request.CreateArtistRequest;
 import com.tuneflow.music_service.dto.request.UpdateArtistRequest;
-import com.tuneflow.music_service.dto.response.AlbumResponse;
 import com.tuneflow.music_service.dto.response.ArtistResponse;
 import org.springframework.web.multipart.MultipartFile;
 

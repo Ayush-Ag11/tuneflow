@@ -7,12 +7,14 @@ import com.tuneflow.music_service.service.FileStorageService;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.minio.RemoveObjectArgs;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,16 +23,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileStorageServiceImpl implements FileStorageService {
 
-    private final MinioClient minioClient;
-    private final MinioProperties minioProperties;
-
     private static final Set<String> IMAGE_CONTENT_TYPES =
             Set.of(
                     "image/jpeg",
                     "image/png",
                     "image/webp"
             );
-
     private static final Set<String> AUDIO_CONTENT_TYPES =
             Set.of(
                     "audio/mpeg",
@@ -38,6 +36,8 @@ public class FileStorageServiceImpl implements FileStorageService {
                     "audio/wav",
                     "audio/x-wav"
             );
+    private final MinioClient minioClient;
+    private final MinioProperties minioProperties;
 
     @PostConstruct
     public void initializeBuckets() {
@@ -113,14 +113,59 @@ public class FileStorageServiceImpl implements FileStorageService {
         );
     }
 
+    @Override
+    public void deleteFile(String fileUrl) {
+
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return;
+        }
+
+        try {
+
+            URI uri = URI.create(fileUrl);
+
+            String path = uri.getPath();
+
+            String[] parts = path.split("/", 3);
+
+            if (parts.length < 3) {
+                return;
+            }
+
+            String bucketName = parts[1];
+            String objectName = parts[2];
+
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build()
+            );
+
+            log.info(
+                    "Deleted object {} from bucket {}",
+                    objectName,
+                    bucketName
+            );
+
+        } catch (Exception ex) {
+
+            log.error(
+                    "Failed to delete file: {}",
+                    fileUrl,
+                    ex
+            );
+        }
+    }
+
     private void createBucketIfNotExists(
             String bucketName) {
 
         try {
 
             boolean exists = minioClient.bucketExists(BucketExistsArgs.builder()
-                            .bucket(bucketName)
-                            .build());
+                    .bucket(bucketName)
+                    .build());
 
             if (exists) {
 
@@ -129,8 +174,8 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
 
             minioClient.makeBucket(MakeBucketArgs.builder()
-                            .bucket(bucketName)
-                            .build());
+                    .bucket(bucketName)
+                    .build());
 
             log.info("Created bucket: {}", bucketName);
 
@@ -152,8 +197,12 @@ public class FileStorageServiceImpl implements FileStorageService {
                 || !allowedTypes.contains(contentType)) {
 
             throw new FileStorageException(
-                    "Unsupported file type: "
-                            + contentType);
+                    String.format(
+                            "Unsupported file type '%s'. Supported file types are: %s",
+                            contentType,
+                            String.join(", ", allowedTypes)
+                    )
+            );
         }
     }
 

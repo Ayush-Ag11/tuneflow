@@ -1,8 +1,10 @@
 # 🎵 TuneFlow
 
-A production-grade Spotify-inspired music streaming platform built using **Java 21**, **Spring Boot 3**, and a **Microservices Architecture**.
+A production-grade Spotify-inspired music streaming platform built using **Java 21**, **Spring Boot 3**, and a *
+*Microservices Architecture**.
 
-TuneFlow is designed to demonstrate real-world backend engineering practices including authentication, API gateway routing, distributed services, object storage, event-driven architecture, and scalable media management.
+TuneFlow is designed to demonstrate real-world backend engineering practices including authentication, API gateway
+routing, distributed services, object storage, event-driven architecture, and scalable media management.
 
 ---
 
@@ -193,16 +195,16 @@ This starts:
 
 ## 🔧 Service Ports
 
-| Service | Port |
-|----------|------|
+| Service         | Port |
+|-----------------|------|
 | Gateway Service | 8081 |
-| Auth Service | 8082 |
-| User Service | 8083 |
-| Music Service | 8084 |
-| Kafka UI | 8080 |
-| MinIO API | 9000 |
-| MinIO Console | 9001 |
-| PostgreSQL | 5433 |
+| Auth Service    | 8082 |
+| User Service    | 8083 |
+| Music Service   | 8084 |
+| Kafka UI        | 8080 |
+| MinIO API       | 9000 |
+| MinIO Console   | 9001 |
+| PostgreSQL      | 5433 |
 
 ---
 

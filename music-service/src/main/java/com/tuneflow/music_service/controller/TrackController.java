@@ -117,7 +117,7 @@ public class TrackController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<TrackResponse>> updateTrack(@PathVariable UUID id,
-            @Valid @RequestBody UpdateTrackRequest request) {
+                                                                  @Valid @RequestBody UpdateTrackRequest request) {
 
         TrackResponse response = trackService.updateTrack(id, request);
 
