@@ -1,8 +1,6 @@
 package com.tuneflow.auth_service.service.impl;
 
-import com.tuneflow.auth_service.client.UserServiceClient;
 import com.tuneflow.auth_service.config.VerificationProperties;
-import com.tuneflow.auth_service.dto.request.CreateUserProfileRequest;
 import com.tuneflow.auth_service.dto.request.LoginRequest;
 import com.tuneflow.auth_service.dto.request.LogoutRequest;
 import com.tuneflow.auth_service.dto.request.RefreshTokenRequest;
@@ -13,11 +11,13 @@ import com.tuneflow.auth_service.dto.response.RegisterResponse;
 import com.tuneflow.auth_service.entity.EmailVerificationToken;
 import com.tuneflow.auth_service.entity.RefreshToken;
 import com.tuneflow.auth_service.entity.User;
+import com.tuneflow.auth_service.events.UserRegisteredEvent;
 import com.tuneflow.auth_service.exception.AccountAlreadyVerifiedException;
 import com.tuneflow.auth_service.exception.EmailAlreadyExistsException;
 import com.tuneflow.auth_service.exception.EmailVerificationException;
 import com.tuneflow.auth_service.exception.InvalidCredentialsException;
 import com.tuneflow.auth_service.exception.UsernameAlreadyExistsException;
+import com.tuneflow.auth_service.kafka.UserEventProducer;
 import com.tuneflow.auth_service.repository.EmailVerificationTokenRepository;
 import com.tuneflow.auth_service.repository.RefreshTokenRepository;
 import com.tuneflow.auth_service.repository.UserRepository;
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
     private final VerificationProperties verificationProperties;
-    private final UserServiceClient userServiceClient;
+    private final UserEventProducer userEventProducer;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -66,18 +66,14 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(user);
 
-        try {
-            userServiceClient.createUserProfile(
-                    new CreateUserProfileRequest(
-                            savedUser.getId(),
-                            savedUser.getUsername(),
-                            savedUser.getEmail()
-                    )
-            );
-        } catch (Exception e) {
-            userRepository.delete(savedUser);
-            throw e;
-        }
+        userEventProducer.publishUserRegistered(
+                new UserRegisteredEvent(
+                        savedUser.getId(),
+                        savedUser.getUsername(),
+                        savedUser.getEmail(),
+                        Instant.now()
+                )
+        );
 
         String verificationToken =
                 UUID.randomUUID().toString();
